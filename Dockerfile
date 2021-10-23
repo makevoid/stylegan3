@@ -6,14 +6,19 @@
 # distribution of this software and related documentation without an express
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
-FROM nvcr.io/nvidia/pytorch:21.08-py3
+FROM nvcr.io/nvidia/pytorch:21.09-py3
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-RUN pip install imageio imageio-ffmpeg==0.4.4 pyspng==0.1.0
+RUN pip install pyspng==0.1.0
 
+# only for video generation:
+# RUN pip install imageio imageio-ffmpeg==0.4.4
+
+RUN rm -rf /workspace
 WORKDIR /workspace
+COPY . ./
 
 RUN (printf '#!/bin/bash\nexec \"$@\"\n' >> /entry.sh) && chmod a+x /entry.sh
 ENTRYPOINT ["/entry.sh"]
