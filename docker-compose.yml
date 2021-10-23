@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+  stylegan3:
+    image: makevoid/stylegan3:latest
+    build:
+      context: .
