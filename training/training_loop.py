@@ -216,7 +216,7 @@ def training_loop(
 
     if rank == 0:
         print(f'Network Summary:"')
-        if !network_summary_enabled
+        if not network_summary_enabled:
             print(f'disabled :)')
 
     if network_summary_enabled && rank == 0:
