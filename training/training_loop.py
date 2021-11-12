@@ -278,7 +278,7 @@ def training_loop(
         save_image_grid(images, os.path.join(run_dir, 'fakes_init.png'), drange=[-1,1], grid_size=grid_size)
 
     # export additional sample images
-    export_sample_images_more = True
+    export_sample_images_more = False
     # export_sample_images_more = False
 
     if export_sample_images_more and rank == 0:
