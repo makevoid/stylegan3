@@ -401,9 +401,17 @@ class SynthesisNetwork(torch.nn.Module):
         w_dim,                          # Intermediate latent (W) dimensionality.
         img_resolution,                 # Output image resolution.
         img_channels,                   # Number of color channels.
+
+        # default configuration
         channel_base        = 32768,    # Overall multiplier for the number of channels.
         channel_max         = 512,      # Maximum number of channels in any layer.
         num_layers          = 14,       # Total number of layers, excluding Fourier features and ToRGB.
+
+        # reduced configuration
+        # channel_base        = 16384,    # Overall multiplier for the number of channels.
+        # channel_max         = 512,      # Maximum number of channels in any layer.
+        # num_layers          = 8,       # Total number of layers, excluding Fourier features and ToRGB.
+
         num_critical        = 2,        # Number of critically sampled layers at the end.
         first_cutoff        = 2,        # Cutoff frequency of the first layer (f_{c,0}).
         first_stopband      = 2**2.1,   # Minimum stopband of the first layer (f_{t,0}).
@@ -423,6 +431,8 @@ class SynthesisNetwork(torch.nn.Module):
         self.margin_size = margin_size
         self.output_scale = output_scale
         self.num_fp16_res = num_fp16_res
+
+        print(">>> Num Layers: "+str(num_layers))
 
         # Geometric progression of layer cutoffs and min. stopbands.
         last_cutoff = self.img_resolution / 2 # f_{c,N}

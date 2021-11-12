@@ -7,6 +7,7 @@
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
 FROM nvcr.io/nvidia/pytorch:21.09-py3
+# FROM nvcr.io/nvidia/pytorch:21.08-py3
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1

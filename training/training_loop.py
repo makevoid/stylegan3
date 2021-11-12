@@ -28,6 +28,47 @@ from metrics import metric_main
 
 #----------------------------------------------------------------------------
 
+
+def setup_snapshot_image_grid_more(training_set, random_seed=1):
+    rnd = np.random.RandomState(random_seed)
+
+    # TODO: use different parameters, pass them as arguments, we want smaller output images but more of them :)
+    gw = np.clip(7680 // training_set.image_shape[2], 7, 32)
+    gh = np.clip(4320 // training_set.image_shape[1], 4, 32)
+
+    # No labels => show random subset of training samples.
+    if not training_set.has_labels:
+        all_indices = list(range(len(training_set)))
+        rnd.shuffle(all_indices)
+        grid_indices = [all_indices[i % len(all_indices)] for i in range(gw * gh)]
+
+    else:
+        # Group training samples by label.
+        label_groups = dict() # label => [idx, ...]
+        for idx in range(len(training_set)):
+            label = tuple(training_set.get_details(idx).raw_label.flat[::-1])
+            if label not in label_groups:
+                label_groups[label] = []
+            label_groups[label].append(idx)
+
+        # Reorder.
+        label_order = sorted(label_groups.keys())
+        for label in label_order:
+            rnd.shuffle(label_groups[label])
+
+        # Organize into grid.
+        grid_indices = []
+        for y in range(gh):
+            label = label_order[y % len(label_order)]
+            indices = label_groups[label]
+            grid_indices += [indices[x % len(indices)] for x in range(gw)]
+            label_groups[label] = [indices[(i + gw) % len(indices)] for i in range(len(indices))]
+
+    # Load data.
+    images, labels = zip(*[training_set[i] for i in grid_indices])
+    return (gw, gh), np.stack(images), np.stack(labels)
+
+
 def setup_snapshot_image_grid(training_set, random_seed=0):
     rnd = np.random.RandomState(random_seed)
     gw = np.clip(7680 // training_set.image_shape[2], 7, 32)
@@ -121,6 +162,11 @@ def training_loop(
     abort_fn                = None,     # Callback function for determining whether to abort training. Must return consistent results across ranks.
     progress_fn             = None,     # Callback function for updating training progress. Called for all ranks.
 ):
+    print('')
+    #print("rank: "+str(rank))
+
+
+    print('Initialize')
     # Initialize.
     start_time = time.time()
     device = torch.device('cuda', rank)
@@ -149,7 +195,9 @@ def training_loop(
     if rank == 0:
         print('Constructing networks...')
     common_kwargs = dict(c_dim=training_set.label_dim, img_resolution=training_set.resolution, img_channels=training_set.num_channels)
+    print('Constructing networks - generator args')
     G = dnnlib.util.construct_class_by_name(**G_kwargs, **common_kwargs).train().requires_grad_(False).to(device) # subclass of torch.nn.Module
+    print('Constructing networks - discriminator args')
     D = dnnlib.util.construct_class_by_name(**D_kwargs, **common_kwargs).train().requires_grad_(False).to(device) # subclass of torch.nn.Module
     G_ema = copy.deepcopy(G).eval()
 
@@ -162,11 +210,16 @@ def training_loop(
             misc.copy_params_and_buffers(resume_data[name], module, require_all=False)
 
     # Print network summary tables.
-    if rank == 0:
-        z = torch.empty([batch_gpu, G.z_dim], device=device)
-        c = torch.empty([batch_gpu, G.c_dim], device=device)
-        img = misc.print_module_summary(G, [z, c])
-        misc.print_module_summary(D, [img, c])
+    print(f'NEWTWORK SUMMARY"') # TODO: re-enable
+    print(f'disabled') # TODO: re-enable
+    network_summary_enabled = False
+
+    if network_summary_enabled:
+      if rank == 0:
+          z = torch.empty([batch_gpu, G.z_dim], device=device)
+          c = torch.empty([batch_gpu, G.c_dim], device=device)
+          img = misc.print_module_summary(G, [z, c])
+          misc.print_module_summary(D, [img, c])
 
     # Setup augmentation.
     if rank == 0:
@@ -223,6 +276,20 @@ def training_loop(
         grid_c = torch.from_numpy(labels).to(device).split(batch_gpu)
         images = torch.cat([G_ema(z=z, c=c, noise_mode='const').cpu() for z, c in zip(grid_z, grid_c)]).numpy()
         save_image_grid(images, os.path.join(run_dir, 'fakes_init.png'), drange=[-1,1], grid_size=grid_size)
+ 
+    # export additional sample images
+    export_sample_images_more = True
+    # export_sample_images_more = False
+  
+    if export_sample_images_more:
+        print("export sample images - more :)")
+        grid_size, images, labels = setup_snapshot_image_grid_more(training_set=training_set)
+        save_image_grid(images, os.path.join(run_dir, 'reals.png'), drange=[0,255], grid_size=grid_size)
+        grid_z = torch.randn([labels.shape[0], G.z_dim], device=device).split(batch_gpu)
+        grid_c = torch.from_numpy(labels).to(device).split(batch_gpu)
+        images = torch.cat([G_ema(z=z, c=c, noise_mode='const').cpu() for z, c in zip(grid_z, grid_c)]).numpy()
+        save_image_grid(images, os.path.join(run_dir, 'fakes_init.png'), drange=[-1,1], grid_size=grid_size)
+
 
     # Initialize logs.
     if rank == 0:
