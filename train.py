@@ -70,33 +70,33 @@ def launch_training(c, desc, outdir, dry_run):
     training_configuration = {}
     # generator network arguments:
     training_configuration["generator_network_args"] = {
-        channel_base: c["G_kwargs"]["channel_base"],
-        channel_max: c["G_kwargs"]["channel_max"],
-        num_layers: c["G_kwargs"]["mapping_kwargs"]["num_layers"],
+        "channel_base": c["G_kwargs"]["channel_base"],
+        "channel_max": c["G_kwargs"]["channel_max"],
+        "num_layers": c["G_kwargs"]["mapping_kwargs"]["num_layers"],
     }
     # discriminator args:
     training_configuration["discriminator_network_args"] = {
-        freeze_layers: c["D_kwargs"]["block_kwargs"]["freeze_layers"],
+        "freeze_layers": c["D_kwargs"]["block_kwargs"]["freeze_layers"],
     }
     # loss function:
     training_configuration["loss_function"] = {
-        freeze_layers: c["loss_kwargs"]["r1_gamma"],
+        "freeze_layers": c["loss_kwargs"]["r1_gamma"],
     }
     # dataset:
     training_configuration["dataset"] = {
-        dataset_path: c["training_set_kwargs"]["path"],
-        images_resolution: c["training_set_kwargs"]["resolution"],
-        dataset_size_images: c["training_set_kwargs"]["max_size"],
-        dataset_seed: c["training_set_kwargs"]["random_seed"],
+        "dataset_path": c["training_set_kwargs"]["path"],
+        "images_resolution": c["training_set_kwargs"]["resolution"],
+        "dataset_size_images": c["training_set_kwargs"]["max_size"],
+        "dataset_seed": c["training_set_kwargs"]["random_seed"],
     }
     training_configuration["options"] = {
         gpus: {
-            num_gpus: c["num_gpus"],
-            batch_size: c["batch_size"],
-            batches_per_gpu: c["batch_gpu"],
+            "num_gpus": c["num_gpus"],
+            "batch_size": c["batch_size"],
+            "batches_per_gpu": c["batch_gpu"],
         },
-        resume_pkl: c["resume_pkl"],
-        run_dir: c["run_dir"],
+        "resume_pkl": c["resume_pkl"],
+        "run_dir": c["run_dir"],
     }
 
     print(json.dumps(training_configuration, indent=2))
