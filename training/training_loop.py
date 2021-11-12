@@ -210,18 +210,20 @@ def training_loop(
             misc.copy_params_and_buffers(resume_data[name], module, require_all=False)
 
     # Print network summary tables.
-    print(f'NEWTWORK SUMMARY"') # TODO: re-enable
-    print(f'disabled') # TODO: re-enable
+    # TODO: extract disable summary in configs
     network_summary_enabled = False
+    # network_summary_enabled = True # default value
 
     if rank == 0:
-      z = torch.empty([batch_gpu, G.z_dim], device=device)
-      c = torch.empty([batch_gpu, G.c_dim], device=device)
+        print(f'Network Summary:"')
+        if !network_summary_enabled
+            print(f'disabled :)')
 
-    if network_summary_enabled:
-      if rank == 0:
-          img = misc.print_module_summary(G, [z, c])
-          misc.print_module_summary(D, [img, c])
+    if network_summary_enabled && rank == 0:
+        z = torch.empty([batch_gpu, G.z_dim], device=device)
+        c = torch.empty([batch_gpu, G.c_dim], device=device)
+        img = misc.print_module_summary(G, [z, c])
+        misc.print_module_summary(D, [img, c])
 
     # Setup augmentation.
     if rank == 0:
@@ -280,7 +282,7 @@ def training_loop(
         save_image_grid(images, os.path.join(run_dir, 'fakes_init.png'), drange=[-1,1], grid_size=grid_size)
 
     # export additional sample images
-    export_sample_images_more = False
+    export_sample_images_more = True
     # export_sample_images_more = False
 
     if export_sample_images_more and rank == 0:
