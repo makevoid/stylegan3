@@ -214,10 +214,12 @@ def training_loop(
     print(f'disabled') # TODO: re-enable
     network_summary_enabled = False
 
+    if rank == 0:
+      z = torch.empty([batch_gpu, G.z_dim], device=device)
+      c = torch.empty([batch_gpu, G.c_dim], device=device)
+
     if network_summary_enabled:
       if rank == 0:
-          z = torch.empty([batch_gpu, G.z_dim], device=device)
-          c = torch.empty([batch_gpu, G.c_dim], device=device)
           img = misc.print_module_summary(G, [z, c])
           misc.print_module_summary(D, [img, c])
 
