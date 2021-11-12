@@ -281,7 +281,7 @@ def training_loop(
     export_sample_images_more = True
     # export_sample_images_more = False
 
-    if export_sample_images_more && rank == 0:
+    if export_sample_images_more and rank == 0:
         print("export sample images - more :)")
         grid_size, images, labels = setup_snapshot_image_grid_more(training_set=training_set)
         save_image_grid(images, os.path.join(run_dir, 'reals.png'), drange=[0,255], grid_size=grid_size)
