@@ -90,7 +90,7 @@ def launch_training(c, desc, outdir, dry_run):
         "dataset_seed": c["training_set_kwargs"]["random_seed"],
     }
     training_configuration["options"] = {
-        gpus: {
+        "gpus": {
             "num_gpus": c["num_gpus"],
             "batch_size": c["batch_size"],
             "batches_per_gpu": c["batch_gpu"],
