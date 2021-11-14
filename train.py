@@ -61,7 +61,21 @@ def launch_training(c, desc, outdir, dry_run):
     c.run_dir = os.path.join(outdir, f'{cur_run_id:05d}-{desc}')
     assert not os.path.exists(c.run_dir)
 
-    # Print options.
+    # Print env details
+    print('Pytorch version:')
+    print(torch.__version__)
+
+    # TODO: print versions
+    # - python
+    # - pip
+    # print(cudatoolkit.__version__)
+    # print(numpy.__version__)
+    # print(scipy.__version__)
+    # print(ninja.__version__)
+    # print(pillow.__version__)
+
+
+    # Print options
     print()
     print('Training options:')
     # full output
